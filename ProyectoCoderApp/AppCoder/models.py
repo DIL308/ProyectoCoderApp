@@ -7,7 +7,7 @@ class Curso(models.Model):
   camada = models.IntegerField()
 
   def __str__(self):
-    return f'{self.nombre} - {self.camada}'
+    return f'{self.nombre}'
 
 class Estudiante(models.Model):
 
@@ -25,6 +25,9 @@ class Profesor(models.Model):
   email = models.EmailField(max_length=254)
   profesion = models.CharField(max_length=50)
   cursos = models.ManyToManyField(Curso)
+
+  def __str__(self):
+    return f'{self.nombre} {self.apellido}'  
 
 class Entregable(models.Model):
 
