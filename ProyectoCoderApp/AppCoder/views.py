@@ -5,6 +5,11 @@ from .forms import CursoFormulario, ProfesorFormulario
 from django.views.generic import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import DeleteView, UpdateView, CreateView
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 
 # Create your views here.
 
@@ -90,6 +95,7 @@ def buscar(request):
         
       return HttpResponse(f'No enviaste info')
 
+@staff_member_required(login_url='/app-coder/')
 def listaProfesores(request):
     
   profesores = Profesor.objects.all()
@@ -162,31 +168,32 @@ def editar_profesor(request, id):
       })
       return render(request, "editarFormulario.html", {"miFormulario": miFormulario, "id": profesor.id})
 
-class CursoList(ListView):
-   
-   model = Curso
-   template_name = 'curso_list.html'
-   context_object_name = 'cursos'
+class CursoList(LoginRequiredMixin, ListView):
+  
+  model = Curso
+  template_name = 'curso_list.html'
+  context_object_name = 'cursos'
 
 class CursoDetail(DetailView):
-   
-   model = Curso
-   template_name = 'curso_detail.html'
-   context_object_name = 'curso'
+  
+  model = Curso
+  template_name = 'curso_detail.html'
+  context_object_name = 'curso'
 
 class CursoCreate(CreateView):
    
-   model = Curso
-   template_name = 'curso_create.html'
-   fields = ['nombre', 'camada']
-   success_url = '/app-coder/'
+  model = Curso
+  template_name = 'curso_create.html'
+  fields = ['nombre', 'camada']
+  success_url = '/app-coder/'
 
 class CursoUpdate(UpdateView):
    
-   model = Curso
-   template_name = 'curso_update.html'
-   fields = ('__all__')
-   success_url = '/app-coder/'
+  model = Curso
+  template_name = 'curso_update.html'
+  fields = ('__all__')
+  success_url = '/app-coder/'
+  context_object_name = 'curso'
 
 class CursoDelete(DeleteView):
    
@@ -194,3 +201,48 @@ class CursoDelete(DeleteView):
    template_name = 'curso_delete.html'
    success_url = '/app-coder/'
 
+def loginView(request):
+   
+  if request.method == 'POST':
+    miFormulario = AuthenticationForm(request, data=request.POST)
+
+    if miFormulario.is_valid():
+        
+      data = miFormulario.cleaned_data
+      usuario = data["username"]
+      psw = data["password"]
+      
+      user = authenticate(username=usuario, password=psw)
+
+      if user:
+        login(request, user)
+        return render(request, 'inicio.html', {"mensaje": f'Bienvenido {usuario}'})
+      
+      else:
+        return render(request, 'inicio.html', {"mensaje": f'Error: datos incorrectos'})
+         
+    else:
+      return render(request, "inicio.html", {"mensaje": "Formulario invalido"})
+  else:
+    miFormulario = AuthenticationForm()
+    return render(request, "login.html", {"miFormulario": miFormulario})
+  
+
+def register(request):
+   
+  if request.method == 'POST':
+    miFormulario = UserCreationForm(request.POST)
+
+    if miFormulario.is_valid():
+        
+      data = miFormulario.cleaned_data
+      username = data["username"]
+      miFormulario.save()
+      return render(request, 'inicio.html', {"mensaje": f'Usuario {username} creado!'})
+         
+    else:
+      return render(request, "inicio.html", {"mensaje": "Formulario invalido"})
+  
+  else:
+    miFormulario = UserCreationForm()
+    return render(request, "registro.html", {"miFormulario": miFormulario})   

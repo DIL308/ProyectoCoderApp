@@ -4,7 +4,7 @@
 
 {% block contenidoQueCambia %}
   
-  <form action="{% url 'ActualizaCursos' form.id %}" method="POST">{% csrf_token %}
+  <form action="{% url 'ActualizaCursos' curso.id %}" method="POST">{% csrf_token %}
 
     {{form.as_p}}
 

@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.auth.views import LogoutView
 from django.urls import path
 from AppCoder.views import *
 
@@ -22,4 +23,7 @@ urlpatterns = [
     path('creaCursos/', CursoCreate.as_view(), name="CreaCursos"),
     path('actualizarCursos/<pk>/', CursoUpdate.as_view(), name="ActualizaCursos"),
     path('eliminarCursos/<pk>/', CursoDelete.as_view(), name="EliminaCursos"),
+    path('login/', loginView, name="Login"),
+    path('registrar/', register, name="Register"),
+    path('logout/', LogoutView.as_view(template_name='logout.html'), name="Logout"),
 ]
