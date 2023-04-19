@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
-from .models import Curso, Profesor
-from .forms import CursoFormulario, ProfesorFormulario
+from .models import Curso, Profesor, Avatar
+from .forms import CursoFormulario, ProfesorFormulario, UserEditForm
 from django.views.generic import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import DeleteView, UpdateView, CreateView
@@ -28,10 +28,14 @@ def lista_cursos(self):
 
     return render(self, "lista_cursos.html", {"lista_cursos": lista})
 
-def inicio(self):
+def inicio(request):
     
-    return render(self, "inicio.html")
-
+    try:
+      avatar = Avatar.objects.get(user=request.user.id)
+      return render(request, 'inicio.html', {'url': avatar.imagen.url})
+    except:
+      return render(request, "inicio.html")
+    
 def cursos(self):
     
     return render(self, "cursos.html")
@@ -246,3 +250,31 @@ def register(request):
   else:
     miFormulario = UserCreationForm()
     return render(request, "registro.html", {"miFormulario": miFormulario})   
+
+@login_required
+def editar_perfil(request):
+
+    usuario = request.user
+
+    if request.method == 'POST':
+      
+      miFormulario = UserEditForm(request.POST, instance=request.user)
+
+      if miFormulario.is_valid():
+          data = miFormulario.cleaned_data
+          # profesor = Profesor(nombre=data['nombre'], apellido=data['apellido'], email=data['email'],profesion=data['profesion'])
+          usuario.email = data['email']
+          usuario.first_name = data['first_name']
+          usuario.last_name = data['last_name']
+          usuario.set_password(data["password1"])
+          usuario.save()
+          
+          return render(request, "inicio.html", {"mensaje": "Datos actualizados!"})
+    
+      else:
+          return render(request, "inicio.html", {"miFormulario": miFormulario})
+    else:
+      miFormulario = UserEditForm(instance=request.user)
+      return render(request, "editarPerfil.html", {"miFormulario": miFormulario})
+
+
