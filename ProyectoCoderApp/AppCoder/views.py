@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from .models import Curso, Profesor, Avatar
-from .forms import CursoFormulario, ProfesorFormulario, UserEditForm
+from .forms import CursoFormulario, ProfesorFormulario, UserEditForm, AvatarFormulario
 from django.views.generic import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import DeleteView, UpdateView, CreateView
@@ -278,3 +278,27 @@ def editar_perfil(request):
       return render(request, "editarPerfil.html", {"miFormulario": miFormulario})
 
 
+
+@login_required
+def agregar_avatar(request):
+   
+  print(request.POST)
+  print(request.FILES)
+
+  if request.method == 'POST':
+    miFormulario = AvatarFormulario(request.POST, request.FILES)
+
+    if miFormulario.is_valid():
+        
+      data = miFormulario.cleaned_data
+      avatar = Avatar(user=request.user, imagen=data["imagen"])
+      avatar.save()
+
+      return render(request, 'inicio.html', {"mensaje": f'Avatar agregado!'})
+         
+    else:
+      return render(request, "inicio.html", {"mensaje": "Formulario invalido"})
+  
+  else:
+    miFormulario = AvatarFormulario()
+    return render(request, "agregarAvatar.html", {"miFormulario": miFormulario})

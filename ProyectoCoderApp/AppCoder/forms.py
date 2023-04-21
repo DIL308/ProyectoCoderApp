@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserChangeForm
 from django.contrib.auth.models import User
-from .models import Curso
+from .models import Curso, Avatar
 
 
 # class CursoFormulario(forms.Form):
@@ -45,3 +45,8 @@ class UserEditForm(UserChangeForm):
     if password2 != self.cleaned_data["password1"]:
       raise forms.ValidationError("Las contraseñas no coinciden!")
     return password2
+  
+class AvatarFormulario(forms.ModelForm):
+   class Meta:
+      model=Avatar
+      fields=('imagen',)  
